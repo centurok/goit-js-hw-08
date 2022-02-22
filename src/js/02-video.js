@@ -7,12 +7,23 @@ const iframe = document.querySelector('iframe');
 const player = new Player(iframe);
 
 if (localTime) {
-  player.setCurrentTime(localTime);
+  player
+    .setCurrentTime(localTime)
+    .then(seconds => {
+      return localTime;
+    })
+    .catch(error => {
+      switch (error.name) {
+        case 'RangeError':
+          break;
+        default:
+          break;
+      }
+    });
 }
-
 player.on('timeupdate', throttle(timeUpdate, 1000));
 
 function timeUpdate(e) {
-  const time = e.seconds;
-  localStorage.setItem(LOCAL_TIME, time);
+  const currentTime = e.seconds;
+  localStorage.setItem(LOCAL_TIME, currentTime);
 }

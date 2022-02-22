@@ -1,48 +1,37 @@
 import throttle from 'lodash/throttle';
 
-const refs = {
-    form: document.querySelector('.feedback-form'),
+const form = document.querySelector('.feedback-form');
+const LOCAL_STORAGE = 'feedback-form-state';
+let items = {};
+
+const formSubmit = e => {
+  e.preventDefault();
+
+  if (form.email.value === '' || form.message.value === '') {
+    e.currentTarget.reset();
+    alert('All fields are required!');
+  } else {
+    console.log(items);
+
+    e.currentTarget.reset();
+    localStorage.removeItem(LOCAL_STORAGE);
+    items = {};
+  }
 };
-const LOCAL_KEY = 'feedback-form-state';
-
-addLocalData();
-
-const formData = {
-    email: refs.form.email.value,
-    message: refs.form.message.value,    
-    };
-
-refs.form.addEventListener('input', throttle(onFormInput, 500));
-refs.form.addEventListener('submit', onFormSubmit);
-
-
-function onFormInput(e) {
-    formData.[e.target.name] = e.target.value,
-       
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(formData));
+const textAreaInput = e => {
+  items[e.target.name] = e.target.value;
+  localStorage.setItem(LOCAL_STORAGE, JSON.stringify(items));
 };
+const populateForm = () => {
+  const saveObj = JSON.parse(localStorage.getItem(LOCAL_STORAGE));
 
-function onFormSubmit(e) {
-    e.preventDefault();
-   
-    const dataSubmit = {
-        email: e.currentTarget.email.value,
-        massage: e.currentTarget.message.value,
+  for (const key in saveObj) {
+    if (key) {
+      form[key].value = populateForm[key];
+      items = saveObj;
     }
-    console.log(dataSubmit);
-    
-    localStorage.removeItem(LOCAL_KEY);
-    refs.form.reset();
+  }
 };
-
-function addLocalData() {
-     const localData = JSON.parse(localStorage.getItem(LOCAL_KEY))
-    
-    if (!localData) return;
-    
-    if (localData.email)
-        refs.form.email.value = localData.email;        
-    if (localData.message)
-        refs.form.message.value = localData.message;  
-  
-}
+form.addEventListener('submit', formSubmit);
+form.addEventListener('input', throttle(textAreaInput, 500));
+populateForm();
